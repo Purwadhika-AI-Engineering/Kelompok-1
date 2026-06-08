@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+brazilian-ecommerce.zip
+database/olist_customers_dataset.csv
+database/olist_geolocation_dataset.csv
+database/olist_order_items_dataset.csv
+database/olist_order_payments_dataset.csv
+database/olist_order_reviews_dataset.csv
+database/olist_orders_dataset.csv
+database/olist_products_dataset.csv
+database/olist_sellers_dataset.csv
+database/product_category_name_translation.csv
