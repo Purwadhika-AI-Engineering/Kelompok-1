@@ -150,7 +150,7 @@ activemq-data/
 # Environments
 .env
 .envrc
-.venv
+.venv/
 env/
 venv/
 ENV/
@@ -226,3 +226,13 @@ database/olist_orders_dataset.csv
 database/olist_products_dataset.csv
 database/olist_sellers_dataset.csv
 database/product_category_name_translation.csv
+
+# Log file
+*.log
+logs/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
