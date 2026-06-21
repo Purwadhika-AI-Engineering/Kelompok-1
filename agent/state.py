@@ -138,7 +138,7 @@ class SupervisorOutput(BaseModel):
         reasoning: Alasan di balik keputusan action.
         tool_request: Wajib diisi jika action adalah tool_call.
         clarification_question: Wajib diisi jika action adalah clarify.
-        term_translation: Penerjemahan istilah relatif baru pada iterasi ini, jika ada.
+        term_translations: Penerjemahan istilah relatif baru pada iterasi ini, jika ada.
     """
     action: Literal["tool_call", "finish", "clarify"] = Field(
         description=(
@@ -161,7 +161,7 @@ class SupervisorOutput(BaseModel):
             "Wajib diisi jika action=clarify, kosongkan jika action lain."
         )
     )
-    term_translation: list[TermTranslation] = Field(
+    term_translations: list[TermTranslation] = Field(
         default_factory=list,
         description=(
             "Penerjemahan istilah relatif baru yang diputuskan pada iterasi ini saja, "
@@ -197,3 +197,30 @@ class AgentState(TypedDict):
     tool_request: Optional[ToolRequest]
     clarification_question: Optional[str]
     final_answer: Optional[str]
+
+
+def build_initial_state(user_question: str, conversation_history: list[dict]) -> AgentState:
+    """Membuat AgentState kosong yang valid untuk memulai satu invocation baru.
+    
+    Mengisi seluruh field secara eksplisit, termasuk field Optional karena TypedDict
+    tidak memiliki default value otomatis. Tanpa fungsi ini, akses ke field yang
+    belum pernah ditulis node manapun akan menghasilkan KeyError, bukan None.
+
+    Args:
+        user_question: Pertanyaan pengguna untuk invocation ini.
+        conversation_history: Riwayat percakapan sebelumnya, list kosong jika baru.
+
+    Returns:
+        AgentState dengan seluruh field terisi nilai awal yang valid.
+    """
+    return {
+        "user_question": user_question,
+        "conversation_history": conversation_history,
+        "investigation_trace": [],
+        "term_translations": [],
+        "iteration_count": 0,
+        "action": None,
+        "tool_request": None,
+        "clarification_question": None,
+        "final_answer": None
+    }
