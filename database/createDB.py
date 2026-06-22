@@ -32,14 +32,14 @@ translation = pd.read_csv('product_category_name_translation.csv')
 
 '''
 make the order_summary table with the following columns: 
-order_id, customer_id, customer_state, customer_city, order_status, order_purchase_timestamp, order_approved_at, 
-order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date, review_score, review_creation_date, 
+order_id, customer_id, customer_unique_id, customer_state, customer_city, order_status, order_purchase_timestamp, order_approved_at, 
+order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date, review_score, review_answer_timestamp, 
 total_payment, payment_type, payment_installments, delivery_days, late_delivery, seller_prep_days, carrier_transit_days
 '''
 
 reviews_agg = reviews.groupby('order_id').agg(
     review_score=('review_score', 'last'),
-    review_creation_date=('review_creation_date', 'last')
+    review_answer_timestamp=('review_answer_timestamp', 'last')
 ).reset_index()
 
 payments_agg = payments.groupby('order_id').agg(
@@ -48,7 +48,7 @@ payments_agg = payments.groupby('order_id').agg(
     payment_installments=('payment_installments', 'max')
 ).reset_index()
 
-order_summary = orders.merge(customers[['customer_id', 'customer_state', 'customer_city']], on='customer_id', how='left') \
+order_summary = orders.merge(customers[['customer_id', 'customer_unique_id', 'customer_state', 'customer_city']], on='customer_id', how='left') \
     .merge(reviews_agg, on='order_id', how='left') \
     .merge(payments_agg, on='order_id', how='left')
 
