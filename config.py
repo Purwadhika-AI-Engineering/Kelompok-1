@@ -25,7 +25,7 @@ QDRANT_COLLECTION_NAME = "olist_reviews"
 # ------------------------------ #
 # Database
 # ------------------------------ #
-DB_PATH = pass
+DB_PATH = "Kelompok-1/OlistInsightAgent_APP/olist.db"
 DB_URI = f"file:{DB_PATH}?mode=ro"
 
 # ------------------------------ #
