@@ -44,28 +44,46 @@ class SqlToolOutput(BaseModel):
 
 class RagToolOutput(BaseModel):
     """Hasil terstruktur dari eksekusi rag_tool.
-    
+
     Args:
         summary: Rangkuman tema dari ulasan yang relevan.
         doc_count_retrieved: Jumlah dokumen yang lolos filter dan reranking.
         filters_applied: Filter metadata yang diterapkan pada pencarian.
+        error: Pesan error jika retrieval gagal, None jika sukses.
     """
     summary: str = Field(
         description=(
-            "Rangkuman tema dominan dari ulasan yang relevan, berdasarkan dokumen "
-            "yang lolos filter metadata dan reranking."
+            "Rangkuman tema dominan dari ulasan yang relevan, berdasarkan "
+            "dokumen yang lolos filter metadata dan reranking. Bedakan tema "
+            "dominan dari penyebutan terisolasi. Sertakan konteks jumlah "
+            "ulasan dan filter yang diterapkan di awal rangkuman."
         )
     )
     doc_count_retrieved: int = Field(
+        default=0,
         description=(
-            "Jumlah dokumen ulasan yang lolos filter dan dinilai relevan setelah reranking. "
-            "Dipakai Insight Agent untuk menilai kekuatan sampel sebelum membuat klaim."
+            "Jumlah dokumen ulasan yang lolos filter dan dinilai relevan "
+            "setelah reranking. Dipakai Insight Agent untuk menilai kekuatan "
+            "sampel sebelum membuat klaim."
         )
     )
     filters_applied: dict = Field(
+        default_factory=dict,
         description=(
-            "Filter metadata yang diterapkan pada pencarian, key-value sesuai field metadata "
-            "yang tersedia di koleksi Qdrant. Hanya sertakan key yang benar-benar dipakai."
+            "Filter metadata yang diterapkan pada pencarian, key-value sesuai "
+            "field metadata yang tersedia di koleksi Qdrant. Hanya sertakan "
+            "key yang benar-benar dipakai. Format nilai: string untuk filter "
+            "kategorikal seperti product_category='furniture' atau "
+            "customer_state='SP', dan range object untuk nilai numerik seperti "
+            "review_score={'gte': 1, 'lte': 2}, review_year={'gte': 2018, "
+            "'lte': 2018}, review_month={'gte': 7, 'lte': 9}."
+        )
+    )
+    error: Optional[str] = Field(
+        default=None,
+        description=(
+            "Pesan error jika retrieval gagal atau kebutuhan tidak bisa "
+            "dipenuhi. Kosongkan jika sukses."
         )
     )
     
