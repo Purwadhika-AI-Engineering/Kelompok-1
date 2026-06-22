@@ -51,8 +51,7 @@ def call_structured(model_name: str, system_prompt: str, user_message: str, outp
     # Membungkus LLM agar output dipaksa sesuai schema Pydantic, bukan teks bebas.
     structured_llm = llm.with_structured_output(
     output_schema,
-    method="function_calling",
-    strict=True,
+    method="function_calling"
     )
     result = structured_llm.invoke([
         {"role": "system", "content": system_prompt},
