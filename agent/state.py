@@ -12,20 +12,32 @@ from pydantic import BaseModel, Field
 class SqlToolOutput(BaseModel):
     """Hasil terstruktur dari eksekusi sql_tool.
 
-    Args
+    Args:
         rows: Baris hasil query.
         query_used: Query SQL lengkap yang dieksekusi.
+        error: Pesan error jika query gagal, None jika sukses.
     """
     rows: list[dict] = Field(
+        default_factory=list,
         description=(
-            "Hasil baris dari eksekusi query SQL. Setiap elemen adalah satu baris, "
-            "berupa dict dengan key sesuai nama kolom pada query."
+            "Hasil baris dari eksekusi query SQL. Setiap elemen adalah satu "
+            "baris, berupa dict dengan key sesuai nama kolom pada query. "
+            "Kosongkan jika query gagal atau kebutuhan tidak bisa dipenuhi."
         )
     )
     query_used: str = Field(
         description=(
-            "Query SQL lengkap yang dieksekusi, ditulis persis seperti yang dijalankan, "
-            "untuk transparansi sumber data ke pengguna dan ditampilkan di antarmuka."
+            "Query SQL lengkap yang dieksekusi, ditulis persis seperti yang "
+            "dijalankan tanpa diringkas atau diubah, untuk transparansi. "
+            "Eksekusi dilakukan oleh sistem di luar LLM, bukan oleh LLM "
+            "sendiri. Kosongkan jika tidak ada query yang bisa dihasilkan."
+        )
+    )
+    error: Optional[str] = Field(
+        default=None,
+        description=(
+            "Pesan error jika query gagal dieksekusi atau kebutuhan data "
+            "tidak bisa dipenuhi skema yang ada. Kosongkan jika sukses."
         )
     )
 
