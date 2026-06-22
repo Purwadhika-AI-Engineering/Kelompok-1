@@ -5,30 +5,30 @@ import os
 
 print("🤖 Starting PRD-Aligned Data Engineering Pipeline...")
 
-db_path = os.path.join('..', 'OlistInsightAgent_APP', 'olist.db')
-
-# Ensure directory exists
-os.makedirs(os.path.dirname(db_path), exist_ok=True)
+db_path = os.path.join('OlistInsightAgent_APP', 'olist.db')
 
 if os.path.exists(db_path):
     os.remove(db_path)
     print("🧹 Cleaned old database file.")
+
+os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 print(f'✅ Successfully created database connection at: {db_path}')
 
 # load the CSV files into pandas DataFrames
+script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else '.'
 
 print('\n📥 Loading source CSV datasets into memory...')
-orders = pd.read_csv('olist_orders_dataset.csv')
-items = pd.read_csv('olist_order_items_dataset.csv')
-payments = pd.read_csv('olist_order_payments_dataset.csv')
-reviews = pd.read_csv('olist_order_reviews_dataset.csv')
-customers = pd.read_csv('olist_customers_dataset.csv')
-products = pd.read_csv('olist_products_dataset.csv')
-sellers = pd.read_csv('olist_sellers_dataset.csv')
-translation = pd.read_csv('product_category_name_translation.csv')
+orders = pd.read_csv(os.path.join(script_dir, 'olist_orders_dataset.csv'))
+items = pd.read_csv(os.path.join(script_dir, 'olist_order_items_dataset.csv'))
+payments = pd.read_csv(os.path.join(script_dir, 'olist_order_payments_dataset.csv'))
+reviews = pd.read_csv(os.path.join(script_dir, 'olist_order_reviews_dataset.csv'))
+customers = pd.read_csv(os.path.join(script_dir, 'olist_customers_dataset.csv'))
+products = pd.read_csv(os.path.join(script_dir, 'olist_products_dataset.csv'))
+sellers = pd.read_csv(os.path.join(script_dir, 'olist_sellers_dataset.csv'))
+translation = pd.read_csv(os.path.join(script_dir, 'product_category_name_translation.csv'))
 
 '''
 make the order_summary table with the following columns: 
@@ -71,6 +71,8 @@ order_id, order_item_id, product_id, seller_id, shipping_limit_date, price,
 freight_value, product_category_name_english, product_name_length, product_description_length, 
 product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm
 '''
+
+products = products.rename(columns={'product_name_lenght': 'product_name_length', 'product_description_lenght': 'product_description_length'})
 
 item_detail = items.merge(products, on='product_id', how='left') \
     .merge(translation, on='product_category_name', how='left') \
