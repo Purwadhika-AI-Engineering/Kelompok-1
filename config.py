@@ -29,7 +29,7 @@ QDRANT_COLLECTION_NAME = "olist_reviews"
 # ------------------------------ #
 # Database
 # ------------------------------ #
-DB_PATH = pass
+DB_PATH = "OlistInsightAgent_APP/olist.db"
 DB_URI = f"file:{DB_PATH}?mode=ro"
 
 
