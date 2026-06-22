@@ -30,6 +30,7 @@ def get_llm(model_name: str) -> ChatOpenAI:
     """
     if model_name not in _model_cache:
         _model_cache[model_name] = ChatOpenAI(model=model_name)
+        
     return _model_cache[model_name]
 
 
@@ -46,12 +47,18 @@ def call_structured(model_name: str, system_prompt: str, user_message: str, outp
         Instance output_schema yang sudah divalidasi sesuai isi respons LLM.
     """
     llm = get_llm(model_name)
+
     # Membungkus LLM agar output dipaksa sesuai schema Pydantic, bukan teks bebas.
-    structured_llm = llm.with_structured_output(output_schema)
+    structured_llm = llm.with_structured_output(
+    output_schema,
+    method="function_calling",
+    strict=True,
+    )
     result = structured_llm.invoke([
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_message}
     ])
+
     return cast(T, result)
 
 
@@ -74,4 +81,5 @@ def call_text(model_name: str, system_prompt: str, user_message: str) -> str:
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_message}
     ])
+
     return str(response.content)
