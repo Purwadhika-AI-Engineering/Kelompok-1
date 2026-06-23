@@ -10,7 +10,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from agent.prompts.sql_prompt import SQL_PROMPT
-from agent.state import SqlToolOutput, ToolRequest
+from agent.state import AgentState, InvestigationStep, SqlToolOutput, ToolRequest
 from config import SQL_TOOL_MODEL
 from services.llm_service import call_structured
 from services.sqlite_service import execute_query
@@ -91,3 +91,48 @@ def run_sql_tool(tool_request: ToolRequest) -> SqlToolOutput:
             query_used=query_plan.query_used,
             error=f"Eksekusi query gagal: {str(e)}"
         )
+    
+
+def sql_tool_node(state: AgentState) -> dict:
+    """Node LangGraph wrapper untuk sql_tool.
+
+    Membaca tool_request dan current_reasoning dari state, menjalankan
+    run_sql_tool, membangun InvestigationStep lengkap, dan mengembalikan
+    update state dengan step baru di investigation_trace.
+
+    Args:
+        state: State graph saat ini berisi tool_request dan current_reasoning
+            yang ditulis Supervisor pada iterasi sebelumnya.
+
+    Returns:
+        Dict update state: investigation_trace berisi satu InvestigationStep
+        baru, dan current_reasoning direset ke None.
+
+    Raises:
+        ValueError: Jika tool_request atau current_reasoning tidak tersedia di state.
+    """
+    # Guard: kedua field wajib ada karena node ini hanya dipanggil saat action=tool_call.
+    if state["tool_request"] is None or state["current_reasoning"] is None:
+        raise ValueError("sql_tool_node dipanggil tanpa tool_request atau current_reasoning di state.")
+
+    tool_request = state["tool_request"]
+    reasoning = state["current_reasoning"]
+    iteration = state["iteration_count"]
+
+    # Jalankan logic sql_tool: generate query, eksekusi, return hasil.
+    tool_output = run_sql_tool(tool_request)
+
+    # Bangun satu siklus Reason-Act-Observe yang lengkap.
+    step = InvestigationStep(
+        iteration=iteration,
+        reasoning=reasoning,
+        tool_called="sql_tool",
+        tool_input=tool_request.data_request,
+        tool_output=tool_output,
+    )
+
+    # Reset current_reasoning setelah dikonsumsi agar tidak terbawa ke iterasi berikutnya.
+    return {
+        "investigation_trace": [step],
+        "current_reasoning": None,
+    }
