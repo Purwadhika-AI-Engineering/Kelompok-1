@@ -272,6 +272,7 @@ class AgentState(TypedDict):
     iteration_count: int
     action: Optional[Literal["tool_call", "finish", "clarify"]]
     tool_request: Optional[ToolRequest]
+    current_reasoning: Optional[str]
     clarification_question: Optional[str]
     final_answer: Optional[str]
 
@@ -300,6 +301,7 @@ def build_initial_state(
         "iteration_count": 0,
         "action": None,
         "tool_request": None,
+        "current_reasoning": None,
         "clarification_question": None,
         "final_answer": None,
     }
