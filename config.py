@@ -3,6 +3,10 @@ Konstanta non-sensitif untuk seluruh sistem Olist Insigt Assistant.
 Credentials dan nilai sensitif diload dari environment variable, bukan dari sini.
 """
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # ------------------------------ #
 # LLM Models
