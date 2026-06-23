@@ -23,6 +23,16 @@ from config import SLIDING_WINDOW
 
 app = FastAPI()
 
+@app.get("/health")
+async def health_check():
+    """Mengecek status server untuk keperluan health check deployment.
+
+    Returns:
+        Dict status server.
+    """
+    return {"status": "healthy"}
+
+
 # Node tool yang menghasilkan progress event saat selesai.
 _TOOL_NODES = {"sql_tool", "rag_tool"}
 
