@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 """
 FastAPI entry point untuk Olist Insight Assistant.
 Mengekspos endpoint /investigate sebagai SSE streaming yang memanggil
