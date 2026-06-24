@@ -66,9 +66,9 @@ df = df.merge(order_summary_df, on='order_id', how='inner')
 df = df.merge(product_mapping, on='order_id', how='left')
 
 # Extract custom date features: year and month metrics
-df['review_creation_date'] = pd.to_datetime(df['review_creation_date'])
-df['review_year'] = df['review_creation_date'].dt.year
-df['review_month'] = df['review_creation_date'].dt.month
+df['review_answer_timestamp'] = pd.to_datetime(df['review_answer_timestamp'])
+df['review_year'] = df['review_answer_timestamp'].dt.year
+df['review_month'] = df['review_answer_timestamp'].dt.month
 df['product_category_name_english'] = df['product_category_name_english'].fillna('unknown')
 
 records = df.to_dict(orient='records')
