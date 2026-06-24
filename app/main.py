@@ -52,11 +52,11 @@ def _render_empty_state() -> None:
         st.markdown("**Apa yang bisa saya bantu?**")
         col_a, col_b, col_c = st.columns(3)
         with col_a:
-            st.markdown("🔍 **Investigasi diagnostik**")
+            st.markdown("🔍 **Investigasi Diagnostik**")
         with col_b:
-            st.markdown("📊 **Analisis kuantitatif**")
+            st.markdown("📊 **Analisis Kuantitatif**")
         with col_c:
-            st.markdown("💬 **Analisis kualitatif**")
+            st.markdown("💬 **Analisis Kualitatif**")
 
         st.divider()
 
@@ -64,13 +64,15 @@ def _render_empty_state() -> None:
 
         # Tiga contoh pertanyaan mewakili tipe investigasi berbeda.
         st.markdown("Kategori produk mana yang menghasilkan revenue tertinggi di 2018?")
-        st.caption("Analisis kuantitatif")
+        st.caption("Analisis Kuantitatif")
+        st.markdown("<br>", unsafe_allow_html=True)
 
         st.markdown("Kenapa review score furniture turun di Q3 2018?")
-        st.caption("Investigasi diagnostik")
+        st.caption("Investigasi Diagnostik")
+        st.markdown("<br>", unsafe_allow_html=True)
 
         st.markdown("Apa keluhan utama pelanggan pada pesanan dengan rating 1-2 bintang?")
-        st.caption("Analisis kualitatif")
+        st.caption("Analisis Kualitatif")
 
 
 def _render_chat_history(room: dict) -> None:
