@@ -8,9 +8,9 @@ import json
 import httpx
 import streamlit as st
 
-from components.answer import render_answer
-from components.sidebar import init_room_state, render_sidebar
-from components.view_sources import render_view_sources
+from app.components.answer import render_answer
+from app.components.sidebar import init_room_state, render_sidebar
+from app.components.view_sources import render_view_sources
 
 
 # URL endpoint FastAPI yang dikonsumsi Streamlit.
