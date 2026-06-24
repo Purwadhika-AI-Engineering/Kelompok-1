@@ -79,7 +79,9 @@ def _build_supervisor_context(state: AgentState) -> str:
     # Riwayat percakapan hanya disertakan jika ada, untuk pertanyaan lanjutan.
     if state["conversation_history"]:
         history_text = "\n".join(
-            f"Pengguna: {turn['user']}\nJawaban: {turn['assistant']}"
+            f"Pengguna: {turn['content']}"
+            if turn['role'] == 'user'
+            else f"Jawaban: {turn['content']}"
             for turn in state["conversation_history"]
         )
         sections.append(f"RIWAYAT PERCAKAPAN\n{history_text}")
