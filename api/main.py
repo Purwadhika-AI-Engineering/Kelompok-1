@@ -10,6 +10,7 @@ from typing import AsyncGenerator, Literal, cast
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
+from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 
 from agent.graph import graph
@@ -146,6 +147,8 @@ async def _stream_investigation(
         last_node_state
         )
     )
+
+    Langfuse().flush()
 
 
 def _build_final_event(
