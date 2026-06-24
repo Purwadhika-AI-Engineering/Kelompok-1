@@ -39,16 +39,38 @@ def _init_app() -> None:
 def _render_empty_state() -> None:
     """Merender halaman awal saat belum ada room yang aktif.
 
-    Menampilkan judul, deskripsi singkat, dan contoh pertanyaan
-    sebagai panduan untuk pengguna baru.
+    Menampilkan judul, kapabilitas sistem, dan contoh pertanyaan sebagai
+    panduan untuk pengguna baru.
     """
-    st.title("Olist Insight Assistant")
-    st.markdown("Ask questions about Olist data in natural language.")
-    st.markdown("---")
-    st.markdown("**Example questions**")
-    st.markdown("- Why did furniture review scores drop in Q3 2018?")
-    st.markdown("- Which category generated the highest revenue?")
-    st.markdown("- What complaints are common among 1-star reviews?")
+    _, col, _ = st.columns([1, 2, 1])
+
+    with col:
+        st.title("🤖 Olist Insight Assistant")
+        st.caption("Investigasi data e-commerce Olist dengan pertanyaan dalam bahasa natural.")
+        st.divider()
+
+        st.markdown("**Apa yang bisa saya bantu?**")
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.markdown("🔍 **Investigasi diagnostik**")
+        with col_b:
+            st.markdown("📊 **Analisis kuantitatif**")
+        with col_c:
+            st.markdown("💬 **Analisis kualitatif**")
+
+        st.divider()
+
+        st.markdown("**Coba tanyakan:**")
+
+        # Tiga contoh pertanyaan mewakili tipe investigasi berbeda.
+        st.markdown("Kategori produk mana yang menghasilkan revenue tertinggi di 2018?")
+        st.caption("Analisis kuantitatif")
+
+        st.markdown("Kenapa review score furniture turun di Q3 2018?")
+        st.caption("Investigasi diagnostik")
+
+        st.markdown("Apa keluhan utama pelanggan pada pesanan dengan rating 1-2 bintang?")
+        st.caption("Analisis kualitatif")
 
 
 def _render_chat_history(room: dict) -> None:

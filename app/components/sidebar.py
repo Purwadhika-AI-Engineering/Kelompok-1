@@ -92,9 +92,9 @@ def _render_room_item(slot: int, room: dict) -> None:
     display_name = room["custom_name"] or room["name"]
     is_active = st.session_state.active_room == slot
     # Bullet aktif (filled) vs tidak aktif (empty) sesuai mockup.
-    bullet = "●" if is_active else "○"
+    bullet = "●  " if is_active else "○  "
 
-    col_name, col_edit, col_close = st.columns([5, 1, 1])
+    col_name, col_edit, col_close = st.columns([4, 1, 1])
 
     with col_name:
         if st.session_state.editing_room == slot:
