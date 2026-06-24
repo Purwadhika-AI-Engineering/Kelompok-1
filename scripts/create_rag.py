@@ -25,7 +25,7 @@ qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 
 # Dynamically handle directory references
 script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else '.'
-db_path = os.path.abspath(os.path.join(script_dir, '..', 'OlistInsightAgent_APP', 'olist.db'))
+db_path = os.path.abspath(os.path.join(script_dir, '..', 'data', 'olist.db'))
 
 if not os.path.exists(db_path):
     print(f"❌ Error: Could not locate SQLite database at {db_path}")

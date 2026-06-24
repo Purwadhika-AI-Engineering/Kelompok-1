@@ -5,7 +5,7 @@ import os
 
 print("🤖 Starting PRD-Aligned Data Engineering Pipeline...")
 
-db_path = os.path.join('OlistInsightAgent_APP', 'olist.db')
+db_path = os.path.join('data', 'olist.db')
 
 if os.path.exists(db_path):
     os.remove(db_path)
