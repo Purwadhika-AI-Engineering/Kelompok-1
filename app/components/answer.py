@@ -6,18 +6,18 @@ Mendeteksi format jawaban dan merender sesuai tipenya.
 import streamlit as st
 
 
-# Marker section untuk deteksi format diagnostik/preskriptif.
-_SECTION_FINDINGS = "FINDINGS"
-_SECTION_CAUSES = "POSSIBLE CAUSES"
-_SECTION_RECOMMENDATIONS = "RECOMMENDATIONS"
+# Marker section sesuai format tiga section di insight_prompt.py.
+_SECTION_TEMUAN_DATA = "TEMUAN DATA"
+_SECTION_KEMUNGKINAN_PENYEBAB = "KEMUNGKINAN PENYEBAB DAN REASONING"
+_SECTION_REKOMENDASI = "REKOMENDASI DAN CATATAN"
 
 
 def render_answer(final_answer: str) -> None:
     """Merender jawaban Insight Agent sesuai format yang terdeteksi.
 
-    Jika jawaban mengandung ketiga section marker (FINDINGS, POSSIBLE CAUSES,
-    RECOMMENDATIONS), dirender sebagai tiga blok terpisah. Jika tidak,
-    dirender sebagai teks biasa untuk jawaban faktual atau klarifikasi.
+    Jika jawaban mengandung ketiga section marker, dirender sebagai tiga
+    blok terpisah. Jika tidak, dirender sebagai teks biasa untuk jawaban
+    faktual atau clarification question.
 
     Args:
         final_answer: String jawaban dari Insight Agent atau clarification_question.
@@ -39,41 +39,35 @@ def _is_diagnostic(text: str) -> bool:
         True jika ketiga section marker ditemukan, False jika tidak.
     """
     return (
-        _SECTION_FINDINGS in text
-        and _SECTION_CAUSES in text
-        and _SECTION_RECOMMENDATIONS in text
+        _SECTION_TEMUAN_DATA in text
+        and _SECTION_KEMUNGKINAN_PENYEBAB in text
+        and _SECTION_REKOMENDASI in text
     )
 
 
 def _render_diagnostic(text: str) -> None:
     """Merender jawaban diagnostik sebagai tiga blok section terpisah.
 
-    Memisahkan teks berdasarkan marker section dan merender tiap bagian
-    dengan heading yang sesuai.
-
     Args:
         text: String jawaban diagnostik yang mengandung ketiga section marker.
     """
     sections = _parse_sections(text)
 
-    if sections.get(_SECTION_FINDINGS):
-        st.markdown(f"**{_SECTION_FINDINGS}**")
-        st.markdown(sections[_SECTION_FINDINGS])
+    if sections.get(_SECTION_TEMUAN_DATA):
+        st.markdown(f"**{_SECTION_TEMUAN_DATA}**")
+        st.markdown(sections[_SECTION_TEMUAN_DATA])
 
-    if sections.get(_SECTION_CAUSES):
-        st.markdown(f"**{_SECTION_CAUSES}**")
-        st.markdown(sections[_SECTION_CAUSES])
+    if sections.get(_SECTION_KEMUNGKINAN_PENYEBAB):
+        st.markdown(f"**{_SECTION_KEMUNGKINAN_PENYEBAB}**")
+        st.markdown(sections[_SECTION_KEMUNGKINAN_PENYEBAB])
 
-    if sections.get(_SECTION_RECOMMENDATIONS):
-        st.markdown(f"**{_SECTION_RECOMMENDATIONS}**")
-        st.markdown(sections[_SECTION_RECOMMENDATIONS])
+    if sections.get(_SECTION_REKOMENDASI):
+        st.markdown(f"**{_SECTION_REKOMENDASI}**")
+        st.markdown(sections[_SECTION_REKOMENDASI])
 
 
 def _parse_sections(text: str) -> dict[str, str]:
     """Memisahkan teks jawaban diagnostik menjadi dict per section.
-
-    Mencari posisi setiap marker dalam teks dan mengekstrak konten
-    di antara marker sebagai isi section tersebut.
 
     Args:
         text: String jawaban diagnostik.
@@ -81,7 +75,7 @@ def _parse_sections(text: str) -> dict[str, str]:
     Returns:
         Dict dengan key nama section dan value isi konten section tersebut.
     """
-    markers = [_SECTION_FINDINGS, _SECTION_CAUSES, _SECTION_RECOMMENDATIONS]
+    markers = [_SECTION_TEMUAN_DATA, _SECTION_KEMUNGKINAN_PENYEBAB, _SECTION_REKOMENDASI]
     positions = {}
 
     # Cari posisi awal setiap marker di dalam teks.
