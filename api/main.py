@@ -1,8 +1,3 @@
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-
 """
 FastAPI entry point untuk Olist Insight Assistant.
 Mengekspos endpoint /investigate sebagai SSE streaming yang memanggil
@@ -10,10 +5,12 @@ graph LangGraph dan meneruskan update ke client secara real-time.
 """
 
 import json
-from typing import Literal, cast
+from typing import AsyncGenerator, Literal, cast
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
+from langfuse.langchain import CallbackHandler
 
 from agent.graph import graph
 from agent.state import AgentState, build_initial_state
@@ -25,8 +22,17 @@ from api.schemas import (
     TraceStep,
 )
 from config import SLIDING_WINDOW
+from observability.langfuse_setup import get_langfuse_handler
+from observability.logging_setup import get_logger, setup_logging
+
+
+load_dotenv()
 
 app = FastAPI()
+
+setup_logging()
+_logger = get_logger(__name__)
+
 
 @app.get("/health")
 async def health_check():
@@ -57,20 +63,25 @@ async def investigate(request: InvestigateRequest) -> StreamingResponse:
     Returns:
         StreamingResponse dengan media type text/event-stream.
     """
+    _logger.info("Investigasi dimulai", extra={"question": request.user_question})
+    
     windowed_history = request.conversation_history[-SLIDING_WINDOW:]
-
     initial_state = build_initial_state(
         user_question=request.user_question,
         conversation_history=windowed_history,
     )
+    langfuse_handler = get_langfuse_handler()
 
     return StreamingResponse(
-        _stream_investigation(initial_state),
-        media_type="text/event-stream",
+        _stream_investigation(initial_state, langfuse_handler),
+        media_type="text/event-stream"
     )
 
 
-async def _stream_investigation(initial_state: AgentState):
+async def _stream_investigation(
+    initial_state: AgentState,
+    langfuse_handler: CallbackHandler,
+) -> AsyncGenerator:
     """Generator SSE yang mengalirkan progress dan final event dari graph.
 
     Memanggil graph.stream() dan memproses setiap update node. Node tool
@@ -81,6 +92,7 @@ async def _stream_investigation(initial_state: AgentState):
 
     Args:
         initial_state: State awal hasil build_initial_state.
+        langfuse_handler: CallbackHandler Langfuse untuk tracing invocation ini.
 
     Yields:
         String SSE berformat 'data: {json}\\n\\n' untuk setiap event.
@@ -89,7 +101,11 @@ async def _stream_investigation(initial_state: AgentState):
     accumulated_translations = []
     last_node_state = {}
 
-    for state_update in graph.stream(initial_state, stream_mode="updates"):
+    for state_update in graph.stream(
+        initial_state,
+        stream_mode="updates",
+        config={"callbacks": [langfuse_handler]},
+    ):
         for node_name, node_state in state_update.items():
             # Akumulasi trace dari setiap node yang menulisnya.
             if "investigation_trace" in node_state:
@@ -107,27 +123,29 @@ async def _stream_investigation(initial_state: AgentState):
 
             trace = node_state.get("investigation_trace", [])
             iteration = trace[-1].iteration if trace else 0
-
             step_name = cast(Literal["sql_tool", "rag_tool", "insight_agent"], node_name)
             event = ProgressEvent(
                 step_name=step_name,
                 status="done",
-                iteration=iteration,
-            )
+                iteration=iteration)
+            
             yield _format_sse(event.model_dump())
 
     # Kirim progress event untuk Insight Agent sebelum final event.
     yield _format_sse(ProgressEvent(
         step_name="insight_agent",
         status="done",
-        iteration=0,
+        iteration=0
     ).model_dump())
 
+    _logger.info("Investigasi selesai", extra={"question": initial_state["user_question"]})
+    
     yield _format_sse(_build_final_event(
         accumulated_trace,
         accumulated_translations,
-        last_node_state,
-    ))
+        last_node_state
+        )
+    )
 
 
 def _build_final_event(
@@ -157,6 +175,7 @@ def _build_final_event(
     )
 
     trace_steps = []
+
     for step in accumulated_trace:
         tool_output = step.tool_output
         trace_steps.append(TraceStep(
