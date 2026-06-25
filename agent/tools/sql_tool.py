@@ -16,12 +16,16 @@ from services.llm_service import call_structured
 from services.sqlite_service import execute_query
 
 
+# Batas maksimum baris yang disimpan ke state sebagai safety net.
+_ROW_CAP = 100
+
+
 class _SqlQueryPlan(BaseModel):
     """Schema internal untuk output LLM sql_tool.
     
     LLM hanya bertugas menghasilkan query SQL yang valid terhadap skema
     yang diberikan di system prompt. Eksekusi dilakukan Python setelah
-    output ini diteriima. Dipisah dari SqlToolOutput agar LLM tidak
+    output ini diterima. Dipisah dari SqlToolOutput agar LLM tidak
     mencoba mengisi field rows yang bukan tugasnya.
 
     Args:
@@ -82,10 +86,15 @@ def run_sql_tool(tool_request: ToolRequest) -> SqlToolOutput:
     # Python mengeksekusi query ke database read-only.
     try:
         rows = execute_query(query_plan.query_used)
+
+        # Potong baris yang masuk ke state sebagai last resort jika prompt tidak cukup.
+        rows = rows[:_ROW_CAP]
+
         return SqlToolOutput(
             rows=rows,
             query_used=query_plan.query_used
         )
+    
     except Exception as e:
         return SqlToolOutput(
             query_used=query_plan.query_used,
