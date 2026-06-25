@@ -25,7 +25,8 @@ qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 
 # Dynamically handle directory references
 script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else '.'
-db_path = os.path.abspath(os.path.join(script_dir, '..', 'data', 'olist.db'))
+root_dir = os.path.abspath(os.path.join(script_dir, '..'))
+db_path = os.path.join(root_dir, 'data', 'olist.db')
 
 if not os.path.exists(db_path):
     print(f"❌ Error: Could not locate SQLite database at {db_path}")
@@ -46,13 +47,17 @@ item_detail_df = pd.read_sql_query(
 conn.close()
 
 # Deduplicate item_detail to get a single categorical product mapped per order context
-product_mapping = item_detail_df.groupby('order_id')['product_category_name_english'].apply(
-    lambda x: ', '.join(x.dropna().unique())
-).reset_index()
+product_mapping = (
+item_detail_df
+.groupby('order_id')['product_category_name_english']
+.first()
+.reset_index()
+)
+product_mapping.columns = ['order_id', 'product_category']
 
 # Load the base reviews file
 print("🧩 Stitching database fields together into metadata frames...")
-df = pd.read_csv(os.path.join(script_dir, 'olist_order_reviews_dataset.csv'))
+df = pd.read_csv(os.path.join(root_dir, 'database', 'olist_order_reviews_dataset.csv'))
 
 # Keep only valid text commentary matches
 df = df[df['review_comment_message'].notna() & (df['review_comment_message'].str.strip() != '')].copy()
@@ -64,12 +69,14 @@ df = df.drop(columns=['review_score'], errors='ignore')
 # Primary join executions
 df = df.merge(order_summary_df, on='order_id', how='inner')
 df = df.merge(product_mapping, on='order_id', how='left')
+df = df[df['review_score'].notna()].copy()
 
 # Extract custom date features: year and month metrics
 df['review_answer_timestamp'] = pd.to_datetime(df['review_answer_timestamp'])
+df = df[df['review_answer_timestamp'].notna()].copy()
 df['review_year'] = df['review_answer_timestamp'].dt.year
 df['review_month'] = df['review_answer_timestamp'].dt.month
-df['product_category_name_english'] = df['product_category_name_english'].fillna('unknown')
+df['product_category'] = df['product_category'].fillna('unknown')
 
 records = df.to_dict(orient='records')
 collection_name = QDRANT_COLLECTION_NAME
@@ -85,6 +92,24 @@ qdrant_client.create_collection(
     collection_name=collection_name,
     vectors_config=models.VectorParams(size=VECTOR_DIMENSION, distance=models.Distance.COSINE)
 )
+
+from qdrant_client.models import PayloadSchemaType
+# Buat payload index untuk semua field yang dipakai sebagai filter.
+fields_to_index = {
+    "review_score": PayloadSchemaType.INTEGER,
+    "customer_state": PayloadSchemaType.KEYWORD,
+    "customer_city": PayloadSchemaType.KEYWORD,
+    "product_category": PayloadSchemaType.KEYWORD,
+    "review_year": PayloadSchemaType.INTEGER,
+    "review_month": PayloadSchemaType.INTEGER,
+}
+for field_name, field_type in fields_to_index.items():
+    qdrant_client.create_payload_index(
+    collection_name=collection_name,
+    field_name=field_name,
+    field_schema=field_type,
+    )
+    print(f"Index dibuat untuk field: {field_name}")
 
 # Batch uploading logic using 100 entries per chunk loop
 batch_size = 100
@@ -107,7 +132,7 @@ for i in tqdm(range(0, len(records), batch_size)):
             "review_score": int(row['review_score']),
             "customer_state": str(row['customer_state']),
             "customer_city": str(row['customer_city']),
-            "product_category": str(row['product_category_name_english']),
+            "product_category": str(row['product_category']),
             "review_year": int(row['review_year']),
             "review_month": int(row['review_month']),
             "text_content": full_context_text

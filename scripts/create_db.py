@@ -5,7 +5,13 @@ import os
 
 print("🤖 Starting PRD-Aligned Data Engineering Pipeline...")
 
+script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else '.'
+root_dir = os.path.abspath(os.path.join(script_dir, '..'))
+
 db_path = os.path.join('data', 'olist.db')
+
+# Target the database directory absolutely under the root workspace
+db_path = os.path.join(root_dir, 'data', 'olist.db')
 
 if os.path.exists(db_path):
     os.remove(db_path)
@@ -18,17 +24,16 @@ cursor = conn.cursor()
 print(f'✅ Successfully created database connection at: {db_path}')
 
 # load the CSV files into pandas DataFrames
-script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else '.'
 
 print('\n📥 Loading source CSV datasets into memory...')
-orders = pd.read_csv(os.path.join(script_dir, 'olist_orders_dataset.csv'))
-items = pd.read_csv(os.path.join(script_dir, 'olist_order_items_dataset.csv'))
-payments = pd.read_csv(os.path.join(script_dir, 'olist_order_payments_dataset.csv'))
-reviews = pd.read_csv(os.path.join(script_dir, 'olist_order_reviews_dataset.csv'))
-customers = pd.read_csv(os.path.join(script_dir, 'olist_customers_dataset.csv'))
-products = pd.read_csv(os.path.join(script_dir, 'olist_products_dataset.csv'))
-sellers = pd.read_csv(os.path.join(script_dir, 'olist_sellers_dataset.csv'))
-translation = pd.read_csv(os.path.join(script_dir, 'product_category_name_translation.csv'))
+orders = pd.read_csv(os.path.join(root_dir, 'database', 'olist_orders_dataset.csv'))
+items = pd.read_csv(os.path.join(root_dir, 'database', 'olist_order_items_dataset.csv'))
+payments = pd.read_csv(os.path.join(root_dir, 'database', 'olist_order_payments_dataset.csv'))
+reviews = pd.read_csv(os.path.join(root_dir, 'database', 'olist_order_reviews_dataset.csv'))
+customers = pd.read_csv(os.path.join(root_dir, 'database', 'olist_customers_dataset.csv'))
+products = pd.read_csv(os.path.join(root_dir, 'database', 'olist_products_dataset.csv'))
+sellers = pd.read_csv(os.path.join(root_dir, 'database', 'olist_sellers_dataset.csv'))
+translation = pd.read_csv(os.path.join(root_dir, 'database', 'product_category_name_translation.csv'))
 
 '''
 make the order_summary table with the following columns: 
@@ -61,8 +66,13 @@ for col in date_cols:
     order_summary[col] = pd.to_datetime(order_summary[col], errors='coerce')
 
 order_summary['delivery_days'] = (order_summary['order_delivered_customer_date'] - order_summary['order_purchase_timestamp']).dt.days
-order_summary['late_delivery'] = order_summary['order_delivered_customer_date'] > order_summary['order_estimated_delivery_date']
+
+mask = (order_summary['order_delivered_customer_date'].notna()) & (order_summary['order_estimated_delivery_date'].notna())
+order_summary['late_delivery'] = None
+order_summary.loc[mask, 'late_delivery'] = order_summary.loc[mask, 'order_delivered_customer_date'] > order_summary.loc[mask, 'order_estimated_delivery_date']
+
 order_summary['seller_prep_days'] = (order_summary['order_delivered_carrier_date'] - order_summary['order_approved_at']).dt.days
+
 order_summary['carrier_transit_days'] = (order_summary['order_delivered_customer_date'] - order_summary['order_delivered_carrier_date']).dt.days
 
 '''
