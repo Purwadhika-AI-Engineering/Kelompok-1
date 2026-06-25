@@ -54,3 +54,9 @@ MAX_ITERATIONS = 7
 # ------------------------------ #
 SLIDING_WINDOW = 20
 MAX_ROOMS = 5
+
+
+# ------------------------------ #
+# Output
+# ------------------------------ #
+INSIGHT_AGENT_MAX_TOKENS = 1500
