@@ -9,7 +9,7 @@ import json
 
 from agent.prompts.insight_prompt import INSIGHT_PROMPT
 from agent.state import AgentState
-from config import INSIGHT_AGENT_MODEL
+from config import INSIGHT_AGENT_MAX_TOKENS, INSIGHT_AGENT_MODEL
 from services.llm_service import call_text
 
 
@@ -34,6 +34,7 @@ def run_insight_agent(state: AgentState) -> dict:
         model_name=INSIGHT_AGENT_MODEL,
         system_prompt=INSIGHT_PROMPT,
         user_message=user_message,
+        max_tokens=INSIGHT_AGENT_MAX_TOKENS,
     )
 
     return {"final_answer": final_answer}
