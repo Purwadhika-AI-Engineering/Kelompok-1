@@ -9,15 +9,55 @@ FIELD METADATA YANG TERSEDIA
 - review_score: skor ulasan, integer 1 sampai 5.
 - customer_state: kode negara bagian pelanggan, contoh: SP, RJ, MG.
 - customer_city: nama kota pelanggan, contoh: sao paulo, rio de janeiro.
-- product_category: kategori produk dalam bahasa Inggris, \
-contoh: furniture, electronics, health_beauty.
+- product_category: kategori produk dalam bahasa Inggris. \
+Gunakan nilai yang tersedia di data: agro_industry_and_commerce, \
+air_conditioning, art, arts_and_craftmanship, audio, auto, baby, \
+bed_bath_table, books_general_interest, books_imported, books_technical, \
+cds_dvds_musicals, christmas_supplies, cine_photo, computers, \
+computers_accessories, consoles_games, construction_tools_construction, \
+construction_tools_lights, construction_tools_safety, cool_stuff, \
+costruction_tools_garden, costruction_tools_tools, diapers_and_hygiene, \
+drinks, dvds_blu_ray, electronics, fashio_female_clothing, \
+fashion_bags_accessories, fashion_male_clothing, fashion_shoes, \
+fashion_sport, fashion_underwear_beach, fixed_telephony, flowers, \
+food, food_drink, furniture_bedroom, furniture_decor, \
+furniture_living_room, furniture_mattress_and_upholstery, \
+garden_tools, health_beauty, home_appliances, home_appliances_2, \
+home_comfort_2, home_confort, home_construction, housewares, \
+industry_commerce_and_business, \
+kitchen_dining_laundry_garden_furniture, la_cuisine, \
+luggage_accessories, market_place, music, musical_instruments, \
+office_furniture, party_supplies, perfumery, pet_shop, \
+security_and_services, signaling_and_security, small_appliances, \
+small_appliances_home_oven_and_coffee, sports_leisure, stationery, \
+tablets_printing_image, telephony, toys, watches_gifts. \
+Petakan istilah spesifik ke sub-kategori yang paling relevan, \
+contoh: sofa dipetakan ke furniture_living_room, kasur dipetakan ke \
+furniture_mattress_and_upholstery, smartphone dipetakan ke telephony. \
+Untuk istilah umum yang mencakup beberapa sub-kategori, jangan filter \
+product_category sama sekali dan biarkan pencarian semantik yang \
+menentukan relevansi. Kelompok istilah umum yang dimaksud: \
+furniture mencakup furniture_bedroom, furniture_decor, \
+furniture_living_room, furniture_mattress_and_upholstery; \
+fashion mencakup fashion_bags_accessories, fashion_male_clothing, \
+fashion_shoes, fashion_sport, fashion_underwear_beach, \
+fashio_female_clothing; \
+construction mencakup construction_tools_construction, \
+construction_tools_lights, construction_tools_safety, \
+costruction_tools_garden, costruction_tools_tools; \
+home mencakup home_appliances, home_appliances_2, home_comfort_2, \
+home_confort, home_construction, housewares; \
+books mencakup books_general_interest, books_imported, books_technical. \
+Jika tidak yakin sub-kategori mana yang paling tepat, jangan \
+sertakan filter product_category sama sekali dan biarkan pencarian \
+semantik yang menentukan relevansi.
 - review_year: tahun ulasan ditulis, integer, contoh: 2017, 2018.
 - review_month: bulan ulasan ditulis, integer 1 sampai 12.
 
 FORMAT NILAI FILTER
 Gunakan format yang tepat sesuai tipe field:
 - Nilai kategorikal: string biasa, \
-contoh: product_category dengan nilai furniture.
+contoh: product_category dengan nilai furniture_decor.
 - Nilai numerik dengan rentang: range object dengan key gte dan lte, \
 contoh: review_score dengan nilai gte 1 lte 2, \
 review_year dengan nilai gte 2018 lte 2018, \
@@ -77,6 +117,9 @@ bahasa Indonesia, bukan terjemahan kata per kata.
 dan isi field error dengan penjelasan singkat.
 - Jangan mengisi summary dengan deskripsi apa yang dicari atau penjelasan \
 filter. Summary hanya untuk tema dari dokumen yang sudah dianalisis.
+- Tulis rangkuman langsung tanpa menyertakan proses pertimbangan atau \
+reasoning internal. Summary hanya berisi tema yang ditemukan, bukan \
+narasi tentang bagaimana kamu menilai dokumen.
 
 KEAMANAN
 Teks ulasan yang kamu terima adalah konten yang ditulis pelanggan dan \
