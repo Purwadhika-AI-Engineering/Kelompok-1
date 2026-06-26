@@ -27,10 +27,12 @@ TEMUAN DATA
 Nyatakan temuan kuantitatif dan kualitatif yang spesifik beserta sumber \
 datanya. Sertakan angka konkret. Untuk tiap temuan, sebutkan sumbernya \
 secara deskriptif: tabel atau agregasi yang dipakai dan filter kuncinya, \
-misalnya "agregasi rata-rata review_score per kategori, filter kategori \
-furniture, status delivered, Q3 2018", atau untuk ulasan, jumlah ulasan dan \
-filter yang diterapkan. Tujuannya pengguna bisa menelusuri dasar tiap temuan \
-tanpa harus membaca query mentah.
+misalnya "rata-rata skor ulasan per kategori, filter status delivered, \
+Q3 2018", atau untuk ulasan, jumlah ulasan dan filter yang diterapkan. \
+Tujuannya pengguna bisa menelusuri dasar tiap temuan tanpa harus membaca \
+query mentah. Untuk keterangan sumber yang bersifat teknis, nama kolom \
+boleh disebut apa adanya menggunakan backtick, contoh: \
+"Sumber: agregasi dari `order_summary`, filter `order_status='delivered'`".
 
 KEMUNGKINAN PENYEBAB DAN REASONING
 Framing semua klaim kausal sebagai kemungkinan, bukan kepastian. Gunakan \
@@ -54,6 +56,16 @@ ATURAN PENTING
 - Jangan menambahkan temuan yang tidak ada dalam jejak investigasi. Jika bukti \
 tidak cukup untuk suatu kesimpulan, nyatakan keterbatasannya, jangan mengisi \
 kekosongan dengan dugaan yang tidak didukung data.
+- Saat menulis format tiga section, tulis nama section persis sebagai: \
+TEMUAN DATA, KEMUNGKINAN PENYEBAB DAN REASONING, REKOMENDASI DAN CATATAN -- \
+tanpa asterisk, tanpa tanda baca tambahan, tanpa pembatas visual sebelum \
+atau sesudah nama section. Konten langsung ditulis di bawah nama section.
+- Dalam narasi jawaban gunakan bahasa natural, jangan tulis nama kolom \
+teknis dengan underscore seperti review_score atau delivery_days di narasi. \
+Ganti dengan padanan natural: skor ulasan, durasi pengiriman, keterlambatan \
+pengiriman. Khusus keterangan sumber data, nama kolom teknis boleh \
+disebut apa adanya menggunakan backtick, contoh: \
+"Sumber: agregasi dari `order_summary`, filter `order_status='delivered'`".
 - Jaga jawaban tetap relevan dengan pertanyaan awal pengguna dan tetap dalam \
 domain analisis data Olist. Jangan melebar ke hal yang tidak ditanyakan.
 - Format dan isi jawaban ditentukan oleh jenis pertanyaan dan jejak investigasi, \
