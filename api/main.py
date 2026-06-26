@@ -5,6 +5,7 @@ graph LangGraph dan meneruskan update ke client secara real-time.
 """
 
 import json
+import time
 from typing import AsyncGenerator, Literal, cast
 
 from dotenv import load_dotenv
@@ -65,23 +66,25 @@ async def investigate(request: InvestigateRequest) -> StreamingResponse:
         StreamingResponse dengan media type text/event-stream.
     """
     _logger.info("Investigasi dimulai", extra={"question": request.user_question})
-    
+
     windowed_history = request.conversation_history[-SLIDING_WINDOW:]
     initial_state = build_initial_state(
         user_question=request.user_question,
         conversation_history=windowed_history,
     )
     langfuse_handler = get_langfuse_handler()
+    start_time = time.monotonic()
 
     return StreamingResponse(
-        _stream_investigation(initial_state, langfuse_handler),
-        media_type="text/event-stream"
+        _stream_investigation(initial_state, langfuse_handler, start_time),
+        media_type="text/event-stream",
     )
 
 
 async def _stream_investigation(
     initial_state: AgentState,
     langfuse_handler: CallbackHandler,
+    start_time: float,
 ) -> AsyncGenerator:
     """Generator SSE yang mengalirkan progress dan final event dari graph.
 
@@ -94,6 +97,7 @@ async def _stream_investigation(
     Args:
         initial_state: State awal hasil build_initial_state.
         langfuse_handler: CallbackHandler Langfuse untuk tracing invocation ini.
+        start_time: Waktu mulai dari time.monotonic() untuk mengukur durasi.
 
     Yields:
         String SSE berformat 'data: {json}\\n\\n' untuk setiap event.
@@ -102,51 +106,66 @@ async def _stream_investigation(
     accumulated_translations = []
     last_node_state = {}
 
-    for state_update in graph.stream(
-        initial_state,
-        stream_mode="updates",
-        config={"callbacks": [langfuse_handler]},
-    ):
-        for node_name, node_state in state_update.items():
-            # Akumulasi trace dari setiap node yang menulisnya.
-            if "investigation_trace" in node_state:
-                accumulated_trace.extend(node_state["investigation_trace"])
+    try:
+        for state_update in graph.stream(
+            initial_state,
+            stream_mode="updates",
+            config={"callbacks": [langfuse_handler]},
+        ):
+            for node_name, node_state in state_update.items():
+                # Akumulasi trace dari setiap node yang menulisnya.
+                if "investigation_trace" in node_state:
+                    accumulated_trace.extend(node_state["investigation_trace"])
 
-            # Akumulasi term_translations dari setiap node yang menulisnya.
-            if "term_translations" in node_state:
-                accumulated_translations.extend(node_state["term_translations"])
+                # Akumulasi term_translations dari setiap node yang menulisnya.
+                if "term_translations" in node_state:
+                    accumulated_translations.extend(node_state["term_translations"])
 
-            # Simpan state node terakhir untuk mengambil final_answer dan clarification_question.
-            last_node_state.update(node_state)
+                # Simpan state node terakhir untuk mengambil final_answer dan clarification_question.
+                last_node_state.update(node_state)
 
-            if node_name not in _TOOL_NODES:
-                continue
+                if node_name not in _TOOL_NODES:
+                    continue
 
-            trace = node_state.get("investigation_trace", [])
-            iteration = trace[-1].iteration if trace else 0
-            step_name = cast(Literal["sql_tool", "rag_tool", "insight_agent"], node_name)
-            event = ProgressEvent(
-                step_name=step_name,
-                status="done",
-                iteration=iteration)
-            
-            yield _format_sse(event.model_dump())
+                trace = node_state.get("investigation_trace", [])
+                iteration = trace[-1].iteration if trace else 0
+                step_name = cast(Literal["sql_tool", "rag_tool", "insight_agent"], node_name)
+                event = ProgressEvent(
+                    step_name=step_name,
+                    status="done",
+                    iteration=iteration,
+                )
+
+                yield _format_sse(event.model_dump())
+
+    except Exception:
+        _logger.exception(
+            "Investigasi gagal",
+            extra={"question": initial_state["user_question"]},
+        )
+        raise
 
     # Kirim progress event untuk Insight Agent sebelum final event.
     yield _format_sse(ProgressEvent(
         step_name="insight_agent",
         status="done",
-        iteration=0
+        iteration=0,
     ).model_dump())
 
-    _logger.info("Investigasi selesai", extra={"question": initial_state["user_question"]})
-    
+    duration_ms = round((time.monotonic() - start_time) * 1000)
+    _logger.info(
+        "Investigasi selesai",
+        extra={
+            "question": initial_state["user_question"],
+            "duration_ms": duration_ms,
+        },
+    )
+
     yield _format_sse(_build_final_event(
         accumulated_trace,
         accumulated_translations,
-        last_node_state
-        )
-    )
+        last_node_state,
+    ))
 
     Langfuse().flush()
 

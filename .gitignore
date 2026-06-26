@@ -237,3 +237,5 @@ logs/
 # macOS
 .DS_Store
 EDA_Olist_Dataset.ipynb
+
+*.egg-info/
