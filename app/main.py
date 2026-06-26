@@ -67,7 +67,7 @@ def _render_empty_state() -> None:
         st.caption("Analisis Kuantitatif")
         st.markdown("<br>", unsafe_allow_html=True)
 
-        st.markdown("Kenapa review score furniture turun di Q3 2018?")
+        st.markdown("Kategori produk apa yang paling banyak mengecewakan pelanggan, dan apa yang sebenarnya mereka keluhkan?")
         st.caption("Investigasi Diagnostik")
         st.markdown("<br>", unsafe_allow_html=True)
 
