@@ -59,7 +59,7 @@ kekosongan dengan dugaan yang tidak didukung data.
 - Saat menulis format tiga section, tulis nama section persis sebagai: \
 TEMUAN DATA, KEMUNGKINAN PENYEBAB DAN REASONING, REKOMENDASI DAN CATATAN -- \
 tanpa asterisk, tanpa tanda baca tambahan, tanpa pembatas visual sebelum \
-atau sesudah nama section. Konten langsung ditulis di bawah nama section.
+atau sesudah nama section.
 - Dalam narasi jawaban gunakan bahasa natural, jangan tulis nama kolom \
 teknis dengan underscore seperti review_score atau delivery_days di narasi. \
 Ganti dengan padanan natural: skor ulasan, durasi pengiriman, keterlambatan \
