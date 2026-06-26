@@ -58,10 +58,12 @@ def _render_diagnostic(text: str) -> None:
         st.markdown(sections[_SECTION_TEMUAN_DATA])
 
     if sections.get(_SECTION_KEMUNGKINAN_PENYEBAB):
+        st.divider()
         st.markdown(f"**{_SECTION_KEMUNGKINAN_PENYEBAB}**")
         st.markdown(sections[_SECTION_KEMUNGKINAN_PENYEBAB])
 
     if sections.get(_SECTION_REKOMENDASI):
+        st.divider()
         st.markdown(f"**{_SECTION_REKOMENDASI}**")
         st.markdown(sections[_SECTION_REKOMENDASI])
 

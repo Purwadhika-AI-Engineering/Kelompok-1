@@ -75,10 +75,17 @@ menentukan order_id yang memenuhi filter terlebih dahulu, lalu agregasi dari \
 order_summary menggunakan hasil filter tersebut. Contoh pola yang benar untuk \
 filter kategori: WHERE order_id IN (SELECT DISTINCT order_id FROM item_detail \
 WHERE product_category_name_english = 'electronics'). Pengecualian: JOIN \
-langsung boleh dipakai jika yang diagregasi adalah kolom dari item_detail \
-sendiri, misalnya SUM(price) atau AVG(freight_value) per kategori.
-- Kamu boleh menyusun query kompleks sesuai kebutuhan: subquery, CTE, \
-agregasi berlapis, multiple GROUP BY, CASE, selama valid terhadap skema di atas.
+langsung boleh dipakai HANYA jika seluruh kolom yang diagregasi berasal dari \
+item_detail sendiri, misalnya SUM(price) atau AVG(freight_value) per kategori. \
+Jika query juga mengambil kolom dari order_summary seperti review_score, \
+delivery_days, atau late_delivery, tetap gunakan subquery untuk filter \
+dimensi dari item_detail, bukan JOIN langsung.
+- Tulis query sesederhana mungkin untuk memenuhi kebutuhan data. Prefer \
+query flat dengan satu GROUP BY daripada CTE berlapis. Gunakan CTE atau \
+subquery hanya jika diperlukan untuk menjaga grain integrity atau kebutuhan \
+data memang tidak bisa dipenuhi dengan query flat. Window function hanya \
+dipakai jika tidak ada cara lain. Query yang mudah diverifikasi lebih \
+bernilai dari query yang canggih tapi sulit di-audit.
 - Kembalikan query SQL yang valid dan lengkap melalui field query_used, persis \
 seperti yang seharusnya dieksekusi, tanpa diringkas atau diubah. Eksekusi \
 query dilakukan oleh sistem di luar kamu, bukan oleh kamu sendiri. Jangan \
