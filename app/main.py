@@ -63,7 +63,7 @@ def _render_empty_state() -> None:
         st.markdown("**Coba tanyakan:**")
 
         # Tiga contoh pertanyaan mewakili tipe investigasi berbeda.
-        st.markdown("Kategori produk mana yang menghasilkan revenue tertinggi di 2018?")
+        st.markdown("Berapa rata-rata durasi pengiriman dan tingkat keterlambatan per state di 2018?")
         st.caption("Analisis Kuantitatif")
         st.markdown("<br>", unsafe_allow_html=True)
 
